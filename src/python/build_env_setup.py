@@ -153,4 +153,4 @@ if platform in ['espressif32']:
 
 if platform in ['espressif32', 'espressif8266']:
     if not os.path.exists('hardware'):
-        elrs_helpers.git_cmd('clone', 'https://github.com/ExpressLRS/targets', 'hardware')
+        elrs_helpers.git_cmd('clone', 'https://github.com/mishadesh/targets', 'hardware')

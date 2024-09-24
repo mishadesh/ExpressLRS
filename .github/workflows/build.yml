@@ -137,7 +137,7 @@ jobs:
       - name: Checkout targets repo
         uses: actions/checkout@v4
         with:
-          repository: ExpressLRS/targets
+          repository: mishadesh/targets
           path: src/hardware
 
       - name: Get firmware artifacts
