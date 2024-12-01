@@ -73,14 +73,6 @@ bool LR1121Driver::Begin(uint32_t minimumFrequency, uint32_t maximumFrequency)
         return false;
     }
 
-    SetMode(LR1121_MODE_STDBY_RC, SX12XX_Radio_1);
-    uint8_t tcxobuf[4];
-
-    tcxobuf[0] = 0x06;
-    tcxobuf[1] = 0x08;
-    tcxobuf[2] = 0xFF;
-    tcxobuf[3] = 0xFF;
-    hal.WriteCommand(LR11XX_SYSTEM_SET_TCXO_MODE_OC, tcxobuf, sizeof(tcxobuf), SX12XX_Radio_1);
     DBGLN("LR1121 #1 Ready");
 
     if (GPIO_PIN_NSS_2 != UNDEF_PIN)
@@ -96,7 +88,6 @@ bool LR1121Driver::Begin(uint32_t minimumFrequency, uint32_t maximumFrequency)
         DBGLN("LR1121 #2 failed to be detected.");
             return false;
         }
-        hal.WriteCommand(LR11XX_SYSTEM_SET_TCXO_MODE_OC, tcxobuf, sizeof(tcxobuf), SX12XX_Radio_2);
         DBGLN("LR1121 #2 Ready");
     }
 
