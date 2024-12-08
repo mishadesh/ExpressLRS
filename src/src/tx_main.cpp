@@ -356,7 +356,6 @@ void SetRFLinkRate(uint8_t index) // Set speed of RF link
 
   if ((ModParams == ExpressLRS_currAirRate_Modparams)
     && (RFperf == ExpressLRS_currAirRate_RFperfParams)
-    && (invertIQ == Radio.IQinverted)
     && (OtaSwitchModeCurrent == newSwitchMode))
     return;
 
@@ -548,7 +547,11 @@ void ICACHE_RAM_ATTR SendRCdataToRF()
   }
   else
   {
-    if ((NextPacketIsMspData && MspSender.IsActive()) || dontSendChannelData)
+    if (firmwareOptions.is_airport)
+    {
+      OtaPackAirportData(&otaPkt, &apInputBuffer);
+    }
+    else if ((NextPacketIsMspData && MspSender.IsActive()) || dontSendChannelData)
     {
       otaPkt.std.type = PACKET_TYPE_MSPDATA;
       if (OtaIsFullRes)
@@ -905,6 +908,8 @@ static void UpdateConnectDisconnectStatus()
       apInputBuffer.flush();
       apOutputBuffer.flush();
       uartInputBuffer.flush();
+
+      VtxTriggerSend();
     }
   }
   // If past RX_LOSS_CNT, or in awaitingModelId state for longer than DisconnectTimeoutMs, go to disconnected
@@ -1024,6 +1029,8 @@ static void ExitBindingMode()
   OtaUpdateCrcInitFromUid();
   InBindingMode = false; // Clear binding mode before SetRFLinkRate() for correct IQ
 
+  UARTconnected();
+  
   SetRFLinkRate(config.GetRate()); //return to original rate
 
   DBGLN("Exiting binding mode");

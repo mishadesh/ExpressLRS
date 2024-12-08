@@ -210,7 +210,7 @@ static void incrementValueIndex(bool init)
     values_index = (values_index - values_min + 1) % values_count + values_min;
     if (state_machine.getParentState() == STATE_PACKET)
     {
-        while (get_elrs_airRateConfig(values_index)->interval < handset->getMinPacketInterval())
+        while (get_elrs_airRateConfig(values_index)->interval < handset->getMinPacketInterval() || !isSupportedRFRate(values_index))
         {
             values_index = (values_index - values_min + 1) % values_count + values_min;
         }
@@ -223,7 +223,7 @@ static void decrementValueIndex(bool init)
     values_index = (values_index - values_min + values_count - 1) % values_count + values_min;
     if (state_machine.getParentState() == STATE_PACKET)
     {
-        while (get_elrs_airRateConfig(values_index)->interval < handset->getMinPacketInterval())
+        while (get_elrs_airRateConfig(values_index)->interval < handset->getMinPacketInterval() || !isSupportedRFRate(values_index))
         {
             values_index = (values_index - values_min + values_count - 1) % values_count + values_min;
         }
@@ -577,7 +577,7 @@ fsm_state_entry_t const wifi_update_menu_fsm[] = {
     {STATE_LAST}
 };
 fsm_state_event_t const wifi_menu_update_events[] = {MENU_EVENTS(wifi_update_menu_fsm)};
-fsm_state_event_t const wifi_ext_execute_events[] = {{EVENT_TIMEOUT, GOTO(STATE_WIFI_EXECUTE)}};
+fsm_state_event_t const wifi_ext_execute_events[] = {{EVENT_TIMEOUT, ACTION_POP}};
 fsm_state_entry_t const wifi_ext_menu_fsm[] = {
     {STATE_WIFI_EXECUTE, nullptr, executeWiFi, 1000, wifi_ext_execute_events, ARRAY_SIZE(wifi_ext_execute_events)},
     {STATE_LAST}
@@ -674,6 +674,7 @@ void jumpToWifiRunning()
 
 void jumpToBleRunning()
 {
+    state_machine.jumpTo(main_menu_fsm, STATE_JOYSTICK);
     state_machine.jumpTo(ble_menu_fsm, STATE_BLE_EXECUTE);
 }
 #endif
