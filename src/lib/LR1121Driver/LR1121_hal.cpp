@@ -114,7 +114,7 @@ void LR1121Hal::reset(bool bootloader)
         {
             digitalWrite(GPIO_PIN_RST_2, HIGH);
         }
-        delay(300); // LR1121 busy is high for 230ms after reset.  The WaitOnBusy timeout is only 1ms.  So this long delay is required.
+        delay(1000); // LR1121 busy is high for 230ms after reset.  The WaitOnBusy timeout is only 1ms.  So this long delay is required.
         if (bootloader)
         {
             pinMode(GPIO_PIN_BUSY, INPUT);
