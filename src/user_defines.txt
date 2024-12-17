@@ -28,7 +28,8 @@
 #-DRegulatory_Domain_ISM_2400
 #-DRegulatory_Domain_EU_CE_2400
 #-DRegulatory_Domain_UA_550_650_100
--DRegulatory_Domain_UA_380_440_60
+#-DRegulatory_Domain_UA_380_440_60
+-DRegulatory_Domain_UA_200_210_10
 
 ### PERFORMANCE OPTIONS: ###
 
