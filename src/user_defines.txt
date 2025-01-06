@@ -21,7 +21,7 @@
 #-DRegulatory_Domain_EU_868
 #-DRegulatory_Domain_IN_866
 #-DRegulatory_Domain_AU_433
-#-DRegulatory_Domain_EU_433
+-DRegulatory_Domain_EU_433
 #-DRegulatory_Domain_US_433
 #-DRegulatory_Domain_US_433_WIDE
 #-DRegulatory_Domain_FCC_915
@@ -31,7 +31,8 @@
 #-DRegulatory_Domain_UA_380_440_60
 #-DRegulatory_Domain_UA_200_210_10
 #-DRegulatory_Domain_C170W23
--DRegulatory_Domain_C190W23
+#-DRegulatory_Domain_C190W23
+#-DRegulatory_Domain_UA_470_520_50
 
 ### PERFORMANCE OPTIONS: ###
 
