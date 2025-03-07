@@ -21,7 +21,7 @@
 #-DRegulatory_Domain_EU_868
 #-DRegulatory_Domain_IN_866
 #-DRegulatory_Domain_AU_433
--DRegulatory_Domain_EU_433
+#-DRegulatory_Domain_EU_433
 #-DRegulatory_Domain_US_433
 #-DRegulatory_Domain_US_433_WIDE
 #-DRegulatory_Domain_FCC_915
@@ -35,6 +35,7 @@
 #-DRegulatory_Domain_UA_470_520_50
 #-DRegulatory_Domain_UA_450_550_100
 #-DRegulatory_Domain_UA_490_560_70
+-DRegulatory_Domain_UA_610_650_40
 
 ### PERFORMANCE OPTIONS: ###
 
@@ -129,4 +130,3 @@
 #-DDEBUG_OPENTX_SYNC
 
 # Use an ELRS TX and RX as a transparent UART over the air
-#-DUSE_AIRPORT_AT_BAUD=9600
