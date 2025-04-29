@@ -161,15 +161,15 @@ def mui():
     response.content_type = 'text/javascript; charset=latin9'
     return apply_template('mui.js')
 
-@route('/hardware.html')
-def hardware_html():
-    response.content_type = 'text/html; charset=latin9'
-    return apply_template('hardware.html')
+# @route('/hardware.html')
+# def hardware_html():
+#     response.content_type = 'text/html; charset=latin9'
+#     return apply_template('hardware.html')
 
-@route('/hardware.js')
-def hardware_js():
-    response.content_type = 'text/javascript; charset=latin9'
-    return apply_template('hardware.js')
+# @route('/hardware.js')
+# def hardware_js():
+#     response.content_type = 'text/javascript; charset=latin9'
+#     return apply_template('hardware.js')
 
 @route('/cw.html')
 def cw_html():

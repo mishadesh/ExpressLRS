@@ -159,8 +159,8 @@ static struct {
   {"/scan.js", "text/javascript", (uint8_t *)SCAN_JS, sizeof(SCAN_JS)},
   {"/mui.js", "text/javascript", (uint8_t *)MUI_JS, sizeof(MUI_JS)},
   {"/elrs.css", "text/css", (uint8_t *)ELRS_CSS, sizeof(ELRS_CSS)},
-  {"/hardware.html", "text/html", (uint8_t *)HARDWARE_HTML, sizeof(HARDWARE_HTML)},
-  {"/hardware.js", "text/javascript", (uint8_t *)HARDWARE_JS, sizeof(HARDWARE_JS)},
+  // {"/hardware.html", "text/html", (uint8_t *)HARDWARE_HTML, sizeof(HARDWARE_HTML)},
+  // {"/hardware.js", "text/javascript", (uint8_t *)HARDWARE_JS, sizeof(HARDWARE_JS)},
   {"/cw.html", "text/html", (uint8_t *)CW_HTML, sizeof(CW_HTML)},
   {"/cw.js", "text/javascript", (uint8_t *)CW_JS, sizeof(CW_JS)},
 #if defined(RADIO_LR1121)
@@ -192,7 +192,7 @@ static void WebUpdateHandleRoot(AsyncWebServerRequest *request)
   AsyncWebServerResponse *response;
   if (connectionState == hardwareUndefined)
   {
-    response = request->beginResponse_P(200, "text/html", (uint8_t*)HARDWARE_HTML, sizeof(HARDWARE_HTML));
+    // response = request->beginResponse_P(200, "text/html", (uint8_t*)HARDWARE_HTML, sizeof(HARDWARE_HTML));
   }
   else
   {
@@ -1109,12 +1109,12 @@ static void startServices()
     server.addHandler(new AsyncCallbackJsonWebHandler("/import", ImportConfiguration, 32768U));
   #endif
 
-  #if defined(RADIO_LR1121)
-    server.on("/lr1121.html", WebUpdateSendContent);
-    server.on("/lr1121.js", WebUpdateSendContent);
-    server.on("/lr1121", HTTP_OPTIONS, corsPreflightResponse);
-    addLR1121Handlers(server);
-  #endif
+  // #if defined(RADIO_LR1121)
+  //   server.on("/lr1121.html", WebUpdateSendContent);
+  //   server.on("/lr1121.js", WebUpdateSendContent);
+  //   server.on("/lr1121", HTTP_OPTIONS, corsPreflightResponse);
+  //   addLR1121Handlers(server);
+  // #endif
 
   addCaptivePortalHandlers();
 
