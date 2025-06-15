@@ -89,4 +89,9 @@ private:
     void TXnbISR(); // ISR for non-blocking TX routine
     void CommitOutputPower();
     void WriteOutputPower(uint8_t pwr, bool isSubGHz, SX12XX_Radio_Number_t radioNumber);
+
+    void TestOutputPowerAtFreq(uint32_t freq_hz, int8_t power_dbm);
+    bool LoadFreqPowerTable(const char* jsonConfig);
+    void CleanupFreqPowerTable();
+    int8_t ApplyPowerFrequencyCorrection(int8_t userPowerDbm, uint32_t freqHz);
 };
