@@ -2,7 +2,9 @@
 #include "LR1121_hal.h"
 #include "LR1121.h"
 #include "logging.h"
+#include "options.h"
 #include <math.h>
+#include "ArduinoJson.h"
 
 LR1121Hal hal;
 LR1121Driver *LR1121Driver::instance = NULL;
@@ -35,6 +37,124 @@ static uint32_t endTX;
 #else
   #define OPT_USE_SX1276_RFO_HF false
 #endif
+
+void LR1121Driver::TestOutputPowerAtFreq(uint32_t freq_hz, int8_t power_dbm)
+{
+    SetFrequencyHz(freq_hz, SX12XX_Radio_1);
+
+    // Set output power (true = subGHz)
+    SetOutputPower(power_dbm, true);
+    // Start continuous wave (CW) output
+    startCWTest(freq_hz, SX12XX_Radio_1);
+
+    DBGLN("CW output at %d MHz, power %d dBm for 5 seconds", freq_hz/1000000, power_dbm);
+    uint32_t start = millis();
+    while (millis() - start < 5000) {
+        delay(100);
+    }
+
+    // Stop transmission (put radio to standby/sleep)
+    SetMode(LR1121_MODE_STDBY_RC, SX12XX_Radio_1);
+    DBGLN("CW output stopped");
+}
+
+typedef struct {
+    uint16_t freqMHz;
+    int8_t powerCorrectionDbm;
+} FreqPowerEntry;
+
+static FreqPowerEntry* freqPowerTable = nullptr;
+static int freqPowerTableSize = 0;
+
+bool LR1121Driver::LoadFreqPowerTable(const char* jsonConfig)
+{
+    DynamicJsonDocument doc(4096);
+    DeserializationError error = deserializeJson(doc, jsonConfig);
+    
+    if (error) {
+        DBGLN("Failed to parse JSON config: %s", error.c_str());
+        return false;
+    }
+
+    if (!doc.containsKey("freq_power_table")) {
+        DBGLN("No freq_power_table found in JSON config");
+        return false;
+    }
+
+    JsonArray table = doc["freq_power_table"];
+    freqPowerTableSize = table.size();
+    
+    if (freqPowerTable != nullptr) {
+        delete[] freqPowerTable;
+    }
+    
+    freqPowerTable = new FreqPowerEntry[freqPowerTableSize];
+    
+    DBGLN("Loading frequency-power table with %d entries:", freqPowerTableSize);
+    for (int i = 0; i < freqPowerTableSize; i++) {
+        JsonArray entry = table[i];
+        freqPowerTable[i].freqMHz = entry[0];
+        freqPowerTable[i].powerCorrectionDbm = entry[1];
+    }
+    
+    return true;
+}
+
+void LR1121Driver::CleanupFreqPowerTable()
+{
+    if (freqPowerTable != nullptr) {
+        delete[] freqPowerTable;
+        freqPowerTable = nullptr;
+        freqPowerTableSize = 0;
+    }
+}
+
+#define POWER_VALUE_LIMIT_DBM 20
+
+int8_t LR1121Driver::ApplyPowerFrequencyCorrection(int8_t requestedPowerDbm, uint32_t freqHz)
+{
+    if (freqPowerTable == nullptr || freqPowerTableSize == 0) {
+        DBGLN("Failed to load power correction table");
+        return requestedPowerDbm;
+    }
+
+    const uint16_t freqMHz = freqHz / 1000000;
+    int8_t correctionDb = 0;
+
+    if (freqMHz <= freqPowerTable[0].freqMHz)
+        correctionDb = freqPowerTable[0].powerCorrectionDbm;
+    else if (freqMHz >= freqPowerTable[freqPowerTableSize - 1].freqMHz)
+        correctionDb = freqPowerTable[freqPowerTableSize - 1].powerCorrectionDbm;
+    else {
+        for (int i = 0; i < freqPowerTableSize - 1; ++i) {
+            if (freqMHz >= freqPowerTable[i].freqMHz && freqMHz <= freqPowerTable[i + 1].freqMHz) {
+                int16_t f1 = freqPowerTable[i].freqMHz;
+                int16_t f2 = freqPowerTable[i + 1].freqMHz;
+                int16_t p1 = freqPowerTable[i].powerCorrectionDbm;
+                int16_t p2 = freqPowerTable[i + 1].powerCorrectionDbm;
+                
+                // (freqMHz - f1) * (p2 - p1) / (f2 - f1) + p1
+                int16_t freqDiff = freqMHz - f1;
+                int16_t powerDiff = p2 - p1;
+                int16_t freqRange = f2 - f1;
+                
+                int32_t interpolated = ((int32_t)freqDiff * powerDiff) / freqRange + p1;
+                correctionDb = (int8_t)interpolated;
+                break;
+            }
+        }
+    }
+
+    int8_t correctedPowerDbm = requestedPowerDbm + correctionDb;
+
+    // Constrain power to max 20 dBm
+    if (correctedPowerDbm > POWER_VALUE_LIMIT_DBM) correctedPowerDbm = POWER_VALUE_LIMIT_DBM;
+
+    DBGLN("Freq: %u MHz | Base: %d dBm | Correction: %d dBm | Applied : %d dBm",
+           freqMHz, requestedPowerDbm, correctionDb, correctedPowerDbm);
+
+    return correctedPowerDbm;
+}
 
 LR1121Driver::LR1121Driver(): SX12xxDriverCommon()
 {
@@ -144,6 +264,14 @@ transitioning from FS mode and the other from Standby mode. This causes the tx d
         rssiCalbuf[9] = 0;
         rssiCalbuf[10] = 0;
         hal.WriteCommand(LR11XX_RADIO_SET_RSSI_CALIBRATION_OC, rssiCalbuf, sizeof(rssiCalbuf), SX12XX_Radio_All);
+    }
+
+    // Load frequency-power table from hardware configuration
+    if (OPT_APPLY_POWER_CORRECTION) {
+        const char* hardwareConfig = getHardware().c_str();
+        if (!LoadFreqPowerTable(hardwareConfig)) {
+            DBGLN("Failed to load frequency-power table from hardware configuration");
+        }
     }
 
     return true;
@@ -354,6 +482,8 @@ void LR1121Driver::SetOutputPower(int8_t power, bool isSubGHz)
         }
         else
         {
+            if (OPT_APPLY_POWER_CORRECTION)
+                power = ApplyPowerFrequencyCorrection(power, currFreq);            
             pwrNew = constrain(power, LR1121_POWER_MIN_HP_PA, LR1121_POWER_MAX_HP_PA);
         }
 

@@ -1,3 +1,6 @@
+#ifndef _HARDWARE_H_
+#define _HARDWARE_H_
+
 #include <stdint.h>
 
 typedef enum {
@@ -44,6 +47,7 @@ typedef enum {
     HARDWARE_power_high,
     HARDWARE_power_max,
     HARDWARE_power_default,
+    HARDWARE_apply_power_correction,
 
     HARDWARE_power_pdet,
     HARDWARE_power_pdet_intercept,
@@ -147,6 +151,10 @@ typedef enum {
     HARDWARE_vtx_amp_pwm_25mW,
     HARDWARE_vtx_amp_pwm_100mW,
 
+    // Frequency-power correction coefficients
+    HARDWARE_freq_power_table,
+    HARDWARE_freq_power_table_count,
+
     HARDWARE_LAST
 } nameType;
 
@@ -157,3 +165,5 @@ const int hardware_int(nameType name);
 const float hardware_float(nameType name);
 const int16_t* hardware_i16_array(nameType name);
 const uint16_t* hardware_u16_array(nameType name);
+
+#endif /* _HARDWARE_H_ */
