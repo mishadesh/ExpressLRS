@@ -38,6 +38,11 @@ static uint32_t endTX;
   #define OPT_USE_SX1276_RFO_HF false
 #endif
 
+// Refers to Aeronetix frequency dependent amplification correction mechanism for LR1121-based TX targets
+#ifndef OPT_APPLY_POWER_CORRECTION
+    #define OPT_APPLY_POWER_CORRECTION false
+#endif
+
 void LR1121Driver::TestOutputPowerAtFreq(uint32_t freq_hz, int8_t power_dbm)
 {
     SetFrequencyHz(freq_hz, SX12XX_Radio_1);
