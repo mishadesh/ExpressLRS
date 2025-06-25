@@ -60,6 +60,7 @@ static const struct {
     {HARDWARE_power_max, "power_max", INT},
     {HARDWARE_power_default, "power_default", INT},
     {HARDWARE_apply_power_correction, "apply_power_correction", BOOL},
+    {HARDWARE_apply_power_correction_dual, "apply_power_correction_dual", BOOL},
     {HARDWARE_power_pdet, "power_pdet", INT},
     {HARDWARE_power_pdet_intercept, "power_pdet_intercept", FLOAT},
     {HARDWARE_power_pdet_slope, "power_pdet_slope", FLOAT},
@@ -141,6 +142,8 @@ static const struct {
     {HARDWARE_vtx_amp_pwm_100mW, "vtx_amp_pwm_100mW", ARRAY},
     {HARDWARE_freq_power_table, "freq_power_table", ARRAY},
     {HARDWARE_freq_power_table_count, "freq_power_table", COUNT},
+    {HARDWARE_freq_power_table_dual, "freq_power_table_dual", ARRAY},
+    {HARDWARE_freq_power_table_dual_count, "freq_power_table_dual", COUNT},
 };
 
 typedef union {

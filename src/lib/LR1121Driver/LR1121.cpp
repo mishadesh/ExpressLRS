@@ -42,6 +42,9 @@ static uint32_t endTX;
 #ifndef OPT_APPLY_POWER_CORRECTION
     #define OPT_APPLY_POWER_CORRECTION false
 #endif
+#ifndef OPT_APPLY_POWER_CORRECTION_DUAL
+    #define OPT_APPLY_POWER_CORRECTION_DUAL false
+#endif
 
 void LR1121Driver::TestOutputPowerAtFreq(uint32_t freq_hz, int8_t power_dbm)
 {
@@ -81,12 +84,23 @@ bool LR1121Driver::LoadFreqPowerTable(const char* jsonConfig)
         return false;
     }
 
-    if (!doc.containsKey("freq_power_table")) {
-        DBGLN("No freq_power_table found in JSON config");
-        return false;
+    JsonArray table;
+    // SubGHz power correction values 
+    if (OPT_APPLY_POWER_CORRECTION) {
+        if (!doc.containsKey("freq_power_table")) {
+            DBGLN("No freq_power_table found in JSON config");
+            return false;
+        }
+        table = doc["freq_power_table"];
+    } else if (OPT_APPLY_POWER_CORRECTION_DUAL) {
+        // 2.4G power correction values
+        if (!doc.containsKey("freq_power_table_dual")) {
+            DBGLN("No freq_power_table_dual found in JSON config");
+            return false;
+        }
+        table = doc["freq_power_table_dual"];
     }
-
-    JsonArray table = doc["freq_power_table"];
+    
     freqPowerTableSize = table.size();
     
     if (freqPowerTable != nullptr) {
@@ -152,8 +166,9 @@ int8_t LR1121Driver::ApplyPowerFrequencyCorrection(int8_t requestedPowerDbm, uin
 
     int8_t correctedPowerDbm = requestedPowerDbm + correctionDb;
 
-    // Constrain power to max 20 dBm
-    if (correctedPowerDbm > POWER_VALUE_LIMIT_DBM) correctedPowerDbm = POWER_VALUE_LIMIT_DBM;
+    // Constrain power to max 20 dBm for SubGHz PA
+    if (OPT_APPLY_POWER_CORRECTION) 
+        if (correctedPowerDbm > POWER_VALUE_LIMIT_DBM) correctedPowerDbm = POWER_VALUE_LIMIT_DBM;
 
     DBGLN("Freq: %u MHz | Base: %d dBm | Correction: %d dBm | Applied : %d dBm",
            freqMHz, requestedPowerDbm, correctionDb, correctedPowerDbm);
@@ -272,7 +287,7 @@ transitioning from FS mode and the other from Standby mode. This causes the tx d
     }
 
     // Load frequency-power table from hardware configuration
-    if (OPT_APPLY_POWER_CORRECTION) {
+    if (OPT_APPLY_POWER_CORRECTION || OPT_APPLY_POWER_CORRECTION_DUAL) {
         const char* hardwareConfig = getHardware().c_str();
         if (!LoadFreqPowerTable(hardwareConfig)) {
             DBGLN("Failed to load frequency-power table from hardware configuration");
@@ -499,11 +514,15 @@ void LR1121Driver::SetOutputPower(int8_t power, bool isSubGHz)
     }
     else
     {
+        if (OPT_APPLY_POWER_CORRECTION_DUAL) {
+            power = ApplyPowerFrequencyCorrection(power, currFreq);    
+        }
         pwrNew = constrain(power, LR1121_POWER_MIN_HF_PA, LR1121_POWER_MAX_HF_PA);
 
         if ((pwrPendingHF == PWRPENDING_NONE && pwrCurrentHF != pwrNew) || pwrPendingHF != pwrNew)
         {
             pwrPendingHF = pwrNew;
+
         }
     }
 }

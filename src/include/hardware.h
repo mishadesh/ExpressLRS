@@ -48,6 +48,7 @@ typedef enum {
     HARDWARE_power_max,
     HARDWARE_power_default,
     HARDWARE_apply_power_correction,
+    HARDWARE_apply_power_correction_dual,
 
     HARDWARE_power_pdet,
     HARDWARE_power_pdet_intercept,
@@ -154,6 +155,8 @@ typedef enum {
     // Frequency-power correction coefficients
     HARDWARE_freq_power_table,
     HARDWARE_freq_power_table_count,
+    HARDWARE_freq_power_table_dual,
+    HARDWARE_freq_power_table_dual_count,
 
     HARDWARE_LAST
 } nameType;
