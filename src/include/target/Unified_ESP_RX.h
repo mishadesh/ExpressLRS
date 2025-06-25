@@ -80,6 +80,7 @@
 #define MaxPower (PowerLevels_e)hardware_int(HARDWARE_power_max)
 #define DefaultPower (PowerLevels_e)hardware_int(HARDWARE_power_default)
 #define OPT_APPLY_POWER_CORRECTION hardware_flag(HARDWARE_apply_power_correction)
+#define OPT_APPLY_POWER_CORRECTION_DUAL hardware_flag(HARDWARE_apply_power_correction_dual)
 
 #define USE_SKY85321
 #define GPIO_PIN_PA_PDET hardware_pin(HARDWARE_power_pdet)

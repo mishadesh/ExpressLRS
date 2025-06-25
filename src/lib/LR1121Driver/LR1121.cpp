@@ -42,6 +42,9 @@ static uint32_t endTX;
 #ifndef OPT_APPLY_POWER_CORRECTION
     #define OPT_APPLY_POWER_CORRECTION false
 #endif
+#ifndef OPT_APPLY_POWER_CORRECTION_DUAL
+    #define OPT_APPLY_POWER_CORRECTION_DUAL false
+#endif
 
 void LR1121Driver::TestOutputPowerAtFreq(uint32_t freq_hz, int8_t power_dbm)
 {
